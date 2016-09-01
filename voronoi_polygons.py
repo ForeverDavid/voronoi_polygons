@@ -45,7 +45,9 @@ def finite_voronoi(vor, scale=1):
     outer_vertices = []
 
     center = vor.points.mean(axis=0)
-    for idx, pointidx, simplex in zip(range(len(vor.ridge_points)), vor.ridge_points, vor.ridge_vertices):
+    for idx, pointidx, simplex in zip(
+            range(len(vor.ridge_points)), vor.ridge_points,
+            vor.ridge_vertices):
         simplex = np.asarray(simplex)
         if np.any(simplex < 0):
 
@@ -68,7 +70,8 @@ def finite_voronoi(vor, scale=1):
             vor.vertices = np.vstack([vor.vertices, far_point])
 
     # Assign points to outer vertices
-    outer_points = list(set([item for sublist in outer_vertices for item in sublist]))
+    outer_points = list(set(
+        [item for sublist in outer_vertices for item in sublist]))
 
     for op in outer_points:
         p = [nv for nv, ov in zip(new_vertices, outer_vertices) if op in ov]
@@ -80,9 +83,13 @@ def finite_voronoi(vor, scale=1):
         region_idx = vor.point_region[point_idx]
         segs = vor.ridge_vertices[(vor.ridge_points == point_idx).any(axis=1)]
 
+        # Remove first point from segment, to force correct direction
+        segs[0, 0] = segs[0, 1]
+
+        # Put segments in correct order
         for i in range(1, len(segs)):
-            # Put segments in correct order
-            idx = np.where([np.any(np.in1d(segs[i-1], s)) for s in segs[i:]])[0][-1]
+            idx = np.where([np.any(np.in1d(segs[i - 1], s)) for s in segs[i:]
+                            ])[0][-1]
             segs[i:] = np.roll(segs[i:], -idx, axis=0)
 
         # Extract vertices from segments
